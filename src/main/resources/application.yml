@@ -1,0 +1,24 @@
+server:
+  port: 88
+spring:
+  application:
+    name: aiflow
+  datasource:
+    url: jdbc:mysql://localhost:3306/userdb
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  sql:
+    init:
+      mode: always

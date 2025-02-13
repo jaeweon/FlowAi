@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>API 분석 다이어그램</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/mermaid@10.4.0/dist/mermaid.min.js"></script>
+</head>
+<body>
+<h2>API 분석 결과</h2>
+<button id="analyzeBtn">API 분석 실행</button>
+<pre class="mermaid" id="diagram">
+graph TD;
+    A[API 분석 대기 중...];
+    </pre>
+<script>
+    $(document).ready(function () {
+        mermaid.initialize({ startOnLoad: false });
+
+        $("#analyzeBtn").click(function () {
+            $.get("/analyze", function (data) {
+                let diagram = "graph TD;\n";
+                let nodes = new Set();
+                let connections = new Set();
+
+                data.forEach(flow => {
+                    let caller = flow.caller.replace(/\s+/g, "_");
+                    let callee = flow.callee.replace(/\s+/g, "_");
+
+                    // 컨트롤러는 Auto_Discovered_API에서 직접 연결
+                    if (caller === "Auto_Discovered_API") {
+                        diagram += `  ${caller} -->|calls| ${callee};\n`;
+                    } else {
+                        // 기존 연결이 없을 때만 추가
+                        if (!connections.has(`${caller} -->|calls| ${callee};`)) {
+                            diagram += `  ${caller} -->|calls| ${callee};\n`;
+                            connections.add(`${caller} -->|calls| ${callee};`);
+                        }
+                    }
+
+                    nodes.add(`${caller} -->|calls| ${callee};`);
+                });
+
+                console.log(" 분석된 API 데이터: ", data);
+                $("#diagram").text(diagram);
+                mermaid.init(undefined, document.querySelectorAll(".mermaid"));
+            });
+        });
+    });
+</script>
+</body>
+</html>
